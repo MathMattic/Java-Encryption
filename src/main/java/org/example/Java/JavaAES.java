@@ -29,7 +29,7 @@ public class JavaAES {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(KEY_LENGTH, random);
         secretKey = keyGen.generateKey();
-//        Files.write(Paths.get(keyName), secretKey.getEncoded());
+        saveKeyAsFile(keyName);
     }
 
     public void saveKeyAsFile(String keyName) throws Exception {
@@ -58,10 +58,11 @@ public class JavaAES {
     }
 
     public void decryptFile(String encryptedFileName, String outputFileName) throws Exception {
-        try(FileInputStream fis = new FileInputStream(encryptedFileName)) {
+        try (FileInputStream fis = new FileInputStream(encryptedFileName)) {
             byte[] ivBytes = new byte[IV_SIZE];
             int bytesRead = fis.read(ivBytes);
-            if(bytesRead != IV_SIZE) throw new IOException("Failed to load IV from encrypted file. Bytes read were: " + bytesRead + " rxpected: " + IV_SIZE);
+            if (bytesRead != IV_SIZE)
+                throw new IOException("Failed to load IV from encrypted file. Bytes read were: " + bytesRead + " expected: " + IV_SIZE);
             IvParameterSpec iv = new IvParameterSpec(ivBytes);
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
@@ -70,7 +71,7 @@ public class JavaAES {
     }
 
     private static void processFile(Cipher cipher, String inputFileName, String outputFileName, byte[] ivBytes) throws IOException, GeneralSecurityException {
-        try(FileInputStream fis = new FileInputStream(inputFileName); FileOutputStream fos = new FileOutputStream(outputFileName)) {
+        try (FileInputStream fis = new FileInputStream(inputFileName); FileOutputStream fos = new FileOutputStream(outputFileName)) {
             if (ivBytes != null) {
                 fos.write(ivBytes);
             } else {
@@ -95,9 +96,5 @@ public class JavaAES {
         }
     }
 }
-
-
-
-
 
 
