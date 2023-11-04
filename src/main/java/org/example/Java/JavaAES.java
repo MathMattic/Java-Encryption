@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.KeySpec;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class JavaAES {
 
@@ -33,6 +35,14 @@ public class JavaAES {
     }
 
     public void saveKeyAsFile(String keyName) throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
+        if(keyName.contains(".")) {
+            String[] k = keyName.split("\\.");
+            keyName = k[0] + "-" + now.format(formatter) + "." + k[1];
+        } else {
+            keyName += "-" + now.format(formatter) + ".key";
+        }
         Files.write(Paths.get(keyName), secretKey.getEncoded());
     }
 
@@ -45,15 +55,8 @@ public class JavaAES {
         byte[] ivBytes = new byte[IV_SIZE];
         random.nextBytes(ivBytes); // new random IV for each encryption use
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
-        Cipher cipher;
-        try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING"); // cypher block chaining
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new GeneralSecurityException("No such algorithm or padding: " + e.getMessage(), e);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            throw new InvalidKeyException("Invalid key or parameters: " + e.getMessage(), e);
-        }
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING"); // cypher block chaining
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
         processFile(cipher, inputFileName, encryptedFileName, ivBytes);
     }
 
