@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.KeySpec;
@@ -37,13 +38,11 @@ public class JavaAES {
     public void saveKeyAsFile(String keyName) throws Exception {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
-        if(keyName.contains(".")) {
-            String[] k = keyName.split("\\.");
-            keyName = k[0] + "-" + now.format(formatter) + "." + k[1];
-        } else {
-            keyName += "-" + now.format(formatter) + ".key";
-        }
-        Files.write(Paths.get(keyName), secretKey.getEncoded());
+        int dotIndex = keyName.lastIndexOf('.');
+        String extension = dotIndex == -1 ? ".key" : keyName.substring(dotIndex);
+        String name = dotIndex == -1 ? keyName : keyName.substring(0, dotIndex);
+        String newKeyName = name + "-" + now.format(formatter) + extension;
+        Files.write(Paths.get(newKeyName), secretKey.getEncoded());
     }
 
     public void loadKeyFromFile(String keyFilePath) throws Exception {
