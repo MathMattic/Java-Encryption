@@ -6,18 +6,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.KeySpec;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 public class JavaAES {
 
     private static final int IV_SIZE = 16;  // Initialization Vector size in bytes for the CBC.
     private static final int ITERATION_COUNT = 65536; // how many times to run PBKDF2 hashing algorithm.
-    private static final int KEY_LENGTH = 256; // in bits. this will determine if its AES128, AES256 etc.
+    private static final int KEY_LENGTH = 256; // in bits. this will determine if its AES128, AES256.
     private SecretKey secretKey;
     private final SecureRandom random = new SecureRandom();
 
@@ -36,13 +34,7 @@ public class JavaAES {
     }
 
     public void saveKeyAsFile(String keyName) throws Exception {
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
-        int dotIndex = keyName.lastIndexOf('.');
-        String extension = dotIndex == -1 ? ".key" : keyName.substring(dotIndex);
-        String name = dotIndex == -1 ? keyName : keyName.substring(0, dotIndex);
-        String newKeyName = name + "-" + now.format(formatter) + extension;
-        Files.write(Paths.get(newKeyName), secretKey.getEncoded());
+        Files.write(Paths.get(keyName), secretKey.getEncoded());
     }
 
     public void loadKeyFromFile(String keyFilePath) throws Exception {
@@ -77,12 +69,12 @@ public class JavaAES {
             if (ivBytes != null) {
                 fos.write(ivBytes);
             } else {
-                fis.skip(IV_SIZE); // Ignore any IDE warning. You need this step.
+                long byteSkipped = fis.skip(IV_SIZE);
+                if (byteSkipped != IV_SIZE)
+                    throw new IOException("Failed to skip IV bytes. Bytes skipped were: " + byteSkipped + " expected: " + IV_SIZE);
             }
-
             byte[] inBuffer = new byte[4096];
             byte[] outBuffer;
-
             int bytesRead;
             while ((bytesRead = fis.read(inBuffer)) != -1) {
                 outBuffer = cipher.update(inBuffer, 0, bytesRead);
@@ -90,13 +82,23 @@ public class JavaAES {
                     fos.write(outBuffer);
                 }
             }
-
             outBuffer = cipher.doFinal();
             if (outBuffer != null) {
                 fos.write(outBuffer);
             }
         }
     }
+
+    public void convertToBase64(String inputKeyName, String outputKeyName) throws IOException {
+        byte[] keyContent = Files.readAllBytes(Paths.get(inputKeyName));
+        String encodedString = Base64.getEncoder().encodeToString(keyContent);
+        System.out.println(encodedString);
+        Files.write(Paths.get(outputKeyName), encodedString.getBytes());
+    }
+
+    public void convertFromBase64(String inputKeyName, String outputKeyName) throws IOException {
+        String encodedString = new String(Files.readAllBytes(Paths.get(inputKeyName)));
+        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+        Files.write(Paths.get(outputKeyName), decodedBytes);
+    }
 }
-
-
