@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.KeySpec;
-import java.util.Base64;
 
 public class JavaAES {
 
@@ -19,21 +18,31 @@ public class JavaAES {
     private SecretKey secretKey;
     private final SecureRandom random = new SecureRandom();
 
-    public void generatePasswordAESKey(String password, String salt) throws Exception {
+    public SecretKey generatePasswordAESKey(String password, String salt) throws Exception {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256"); // Password-Based Key Derivation Function that internally uses a cryptographic hash function (HMAC-SHA256).
         SecretKey tmp = factory.generateSecret(spec); // generate temp key derived from the PBKDF2 password.
         secretKey = new SecretKeySpec(tmp.getEncoded(), "AES"); // create AES key from the temp key.
+        return secretKey;
     }
 
-    public void generateRandomizedAESKey(String keyName) throws Exception {
+    public SecretKey generateRandomizedAESKey() throws Exception {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(KEY_LENGTH, random);
         secretKey = keyGen.generateKey();
-        saveKeyAsFile(keyName);
+        return secretKey;
     }
 
-    public void saveKeyAsFile(String keyName) throws Exception {
+    public SecretKey getAESKey() {
+        return secretKey;
+    }
+
+    public SecretKey setAESKey(SecretKey key) {
+        secretKey = key;
+        return secretKey;
+    }
+
+    public void saveKeyAsFile(String keyName) throws IOException {
         Files.write(Paths.get(keyName), secretKey.getEncoded());
     }
 
@@ -87,18 +96,5 @@ public class JavaAES {
                 fos.write(outBuffer);
             }
         }
-    }
-
-    public void convertToBase64(String inputKeyName, String outputKeyName) throws IOException {
-        byte[] keyContent = Files.readAllBytes(Paths.get(inputKeyName));
-        String encodedString = Base64.getEncoder().encodeToString(keyContent);
-        System.out.println(encodedString);
-        Files.write(Paths.get(outputKeyName), encodedString.getBytes());
-    }
-
-    public void convertFromBase64(String inputKeyName, String outputKeyName) throws IOException {
-        String encodedString = new String(Files.readAllBytes(Paths.get(inputKeyName)));
-        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-        Files.write(Paths.get(outputKeyName), decodedBytes);
     }
 }
