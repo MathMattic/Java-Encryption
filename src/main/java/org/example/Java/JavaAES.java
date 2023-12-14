@@ -12,7 +12,8 @@ import java.security.spec.KeySpec;
 
 public class JavaAES {
 
-    private static final int IV_SIZE = 16;  // Initialization Vector size in bytes for the CBC.
+    private static final int IV_SIZE = 12;  // Initialization Vector size in bytes for the GCM. (96 bits)
+    private static final int TAG_LENGTH = 128; // Authentication tag size in bits for the GCM. (128 bits)
     private static final int ITERATION_COUNT = 65536; // how many times to run PBKDF2 hashing algorithm.
     private static final int KEY_LENGTH = 256; // in bits. this will determine if its AES128, AES256.
     private SecretKey secretKey;
@@ -54,8 +55,8 @@ public class JavaAES {
     public void encryptFile(String inputFileName, String encryptedFileName) throws Exception {
         byte[] ivBytes = new byte[IV_SIZE];
         random.nextBytes(ivBytes); // new random IV for each encryption use
-        IvParameterSpec iv = new IvParameterSpec(ivBytes);
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING"); // cypher block chaining
+        GCMParameterSpec iv = new GCMParameterSpec(TAG_LENGTH, ivBytes);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding"); // Galois/Counter Mode
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
         processFile(cipher, inputFileName, encryptedFileName, ivBytes);
     }
@@ -66,8 +67,8 @@ public class JavaAES {
             int bytesRead = fis.read(ivBytes);
             if (bytesRead != IV_SIZE)
                 throw new IOException("Failed to load IV from encrypted file. Bytes read were: " + bytesRead + " expected: " + IV_SIZE);
-            IvParameterSpec iv = new IvParameterSpec(ivBytes);
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            GCMParameterSpec iv = new GCMParameterSpec(TAG_LENGTH, ivBytes);
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
             processFile(cipher, encryptedFileName, outputFileName, null);
         }
@@ -75,7 +76,7 @@ public class JavaAES {
 
     private static void processFile(Cipher cipher, String inputFileName, String outputFileName, byte[] ivBytes) throws IOException, GeneralSecurityException {
         try (FileInputStream fis = new FileInputStream(inputFileName); FileOutputStream fos = new FileOutputStream(outputFileName)) {
-            if (ivBytes != null) {
+            if (ivBytes != null) { // ivBytes is null when decrypting
                 fos.write(ivBytes);
             } else {
                 long byteSkipped = fis.skip(IV_SIZE);
@@ -97,4 +98,5 @@ public class JavaAES {
             }
         }
     }
+
 }
