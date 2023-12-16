@@ -1,57 +1,31 @@
 package org.example.Java;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.HexFormat;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class JavaUtil {
+    private JavaUtil(){}
 
-    public void encryptMessage(PublicKey publicKey, String aesKeyName, String message, String encryptedMessage) throws Exception {
-        JavaAES aes = new JavaAES();
-        // take the public RSA key passed in
-        // create a random AES key
-        aes.generateRandomizedAESKey();
-        // encrypt the message with the AES key
-        // encrypt the AES key with the RSA public key
-        aes.encryptFile(message, encryptedMessage);
-        encryptAESKey(aes.getAESKey(), publicKey, aesKeyName);
+    public static void encryptMessage(JavaRSA rsa, JavaAES aes, String message, String encryptedMessage) throws Exception {
     }
 
-    public void decryptMessage(PrivateKey privateKey, String encryptedAESKey, String encryptedMessage, String decryptedMessage) throws Exception {
-        JavaAES aes = new JavaAES();
-        byte[] aeskey = Files.readAllBytes(Paths.get(encryptedAESKey));
-        // take the private RSA passed in
-        // take the encrypted AES key and decrypt it with the RSA private key
-        SecretKey decryptedAESKey = decryptAESKey(aeskey, privateKey);
-        aes.setAESKey(decryptedAESKey);
-        aes.decryptFile(encryptedMessage, decryptedMessage);
-    }
-
-    private byte[] encryptAESKey(SecretKey aesKey, PublicKey publicKey, String encryptedKeyName) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        byte[] encryptedKey = cipher.doFinal(aesKey.getEncoded());
-        Files.write(Paths.get(encryptedKeyName), encryptedKey);
-        return encryptedKey;
-    }
-
-    public SecretKey decryptAESKey(byte[] encryptedAESKey, PrivateKey privateKey) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] aesKeyBytes = cipher.doFinal(encryptedAESKey);
-        return new SecretKeySpec(aesKeyBytes, "AES");
+    public static void decryptMessage(PrivateKey privateKey, String encryptedAESKey, String encryptedMessage, String decryptedMessage) throws Exception {
     }
 
     public static String convertToBase64(String inputString, String outputString) throws IOException {
         byte[] content = Files.readAllBytes(Paths.get(inputString));
         String encodedString = Base64.getEncoder().encodeToString(content);
-        Files.writeString(Paths.get(outputString+"Base64"), encodedString);
+        Files.writeString(Paths.get(outputString + "Base64"), encodedString);
         return encodedString;
     }
 
@@ -61,5 +35,40 @@ public class JavaUtil {
         Files.write(Paths.get(outputKeyName), decodedBytes);
         return encodedString;
     }
+
+    public static String generatePassword(int length) {
+        String alphaLower = "abcdefghijklmnopqrstuvwxyz";
+        String alphaUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String num = "0123456789";
+        String specialChars = "!@#$%&*()_+-=[]?";
+        String passChars = alphaLower + alphaUpper + num + specialChars;
+        SecureRandom r = new SecureRandom();
+
+        if (length < 16) throw new IllegalArgumentException("Salt must be at least 16 character(s).");
+
+        return IntStream.range(0, length)
+                .map(i -> passChars.charAt(r.nextInt(passChars.length())))
+                .mapToObj(c -> String.valueOf((char) c)).collect(Collectors.joining());
+    }
+
+    public static byte[] generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16]; // 128-bit salt
+        random.nextBytes(salt);
+        return salt;
+    }
+
+
+    public static void hash() throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA3-512");
+        md.update("pass".getBytes(StandardCharsets.UTF_8));
+        md.update("salt".getBytes(StandardCharsets.UTF_8));
+        byte[] hashBytes = md.digest();
+        for(byte b : hashBytes) System.out.printf("%02x", b); // %x int in hex format, %02x means 2 digits, with leading 0 if needed.
+        System.out.println();
+        System.out.println(HexFormat.of().withDelimiter("-").withUpperCase().formatHex(hashBytes));
+//        UUID.randomUUID()
+    }
+
 
 }

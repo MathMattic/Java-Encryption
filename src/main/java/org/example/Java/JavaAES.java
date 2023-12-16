@@ -34,22 +34,21 @@ public class JavaAES {
         return secretKey;
     }
 
-    public SecretKey getAESKey() {
+    public SecretKey getKey() {
         return secretKey;
     }
 
-    public SecretKey setAESKey(SecretKey key) {
-        secretKey = key;
-        return secretKey;
+    public void setKey(SecretKey secretKey) {
+        this.secretKey = secretKey;
     }
 
-    public void saveKeyAsFile(String keyName) throws IOException {
+    public void saveKey(String keyName) throws IOException {
         Files.write(Paths.get(keyName), secretKey.getEncoded());
     }
 
-    public void loadKeyFromFile(String keyFilePath) throws Exception {
+    public SecretKey loadKey(String keyFilePath) throws Exception {
         byte[] keyBytes = Files.readAllBytes(Paths.get(keyFilePath));
-        secretKey = new SecretKeySpec(keyBytes, "AES");
+        return new SecretKeySpec(keyBytes, "AES");
     }
 
     public void encryptFile(String inputFileName, String encryptedFileName) throws Exception {
@@ -76,7 +75,7 @@ public class JavaAES {
 
     private static void processFile(Cipher cipher, String inputFileName, String outputFileName, byte[] ivBytes) throws IOException, GeneralSecurityException {
         try (FileInputStream fis = new FileInputStream(inputFileName); FileOutputStream fos = new FileOutputStream(outputFileName)) {
-            if (ivBytes != null) { // ivBytes is null when decrypting
+            if (ivBytes != null) { // if not null, do encryption mode
                 fos.write(ivBytes);
             } else {
                 long byteSkipped = fis.skip(IV_SIZE);
