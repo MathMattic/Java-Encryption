@@ -21,7 +21,7 @@ public class JavaAES {
 
     public SecretKey generatePasswordAESKey(String password, String salt) throws Exception {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256"); // Password-Based Key Derivation Function that internally uses a cryptographic hash function (HMAC-SHA256).
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512"); // Password-Based Key Derivation Function that internally uses a cryptographic hash function (HMAC-SHA512).
         SecretKey tmp = factory.generateSecret(spec); // generate temp key derived from the PBKDF2 password.
         secretKey = new SecretKeySpec(tmp.getEncoded(), "AES"); // create AES key from the temp key.
         return secretKey;
