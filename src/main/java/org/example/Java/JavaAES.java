@@ -10,11 +10,11 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.KeySpec;
 
-public class JavaAES {
+public class JavaAES { // TODO add compression step
 
     private static final int IV_SIZE = 12;  // Initialization Vector size in bytes for the GCM. (96 bits)
     private static final int TAG_LENGTH = 128; // Authentication tag size in bits for the GCM. (128 bits)
-    private static final int ITERATION_COUNT = 65536; // how many times to run PBKDF2 hashing algorithm.
+    private static final int ITERATION_COUNT = 65536; // how many times to run PBKDF2 hashing algorithm. (2^16)
     private static final int KEY_LENGTH = 256; // in bits. this will determine if its AES128, AES256.
     private SecretKey secretKey;
     private final SecureRandom random = new SecureRandom();
@@ -22,7 +22,7 @@ public class JavaAES {
     public SecretKey generatePasswordAESKey(String password, String salt) throws Exception {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512"); // Password-Based Key Derivation Function that internally uses a cryptographic hash function (HMAC-SHA512).
-        SecretKey tmp = factory.generateSecret(spec); // generate temp key derived from the PBKDF2 password.
+        SecretKey tmp = factory.generateSecret(spec); // generate temp key material derived from the PBKDF2 password.
         secretKey = new SecretKeySpec(tmp.getEncoded(), "AES"); // create AES key from the temp key.
         return secretKey;
     }
