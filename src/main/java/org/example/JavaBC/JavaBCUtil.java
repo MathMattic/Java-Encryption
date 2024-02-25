@@ -57,7 +57,7 @@ public class JavaBCUtil {
     }
 
 
-    // BC version of SHA3-512
+    // BC version of SHA3-512 hash
     public static void hashBC() {
         SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest512();
         byte[] input = "your password here".getBytes();
@@ -67,7 +67,7 @@ public class JavaBCUtil {
         System.out.println("SHA3-512 Hash: " + hashString);
     }
 
-    // BC version of Whirlpool
+    // BC version of Whirlpool hash
     public static void WhirlpoolHashingExample() {
         WhirlpoolDigest digest = new WhirlpoolDigest();
         String input = "your input here";
