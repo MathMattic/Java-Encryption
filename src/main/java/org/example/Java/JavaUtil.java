@@ -1,5 +1,6 @@
 package org.example.Java;
 
+import javax.crypto.SecretKey;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,14 +21,51 @@ import java.util.zip.InflaterInputStream;
 public class JavaUtil {
     private JavaUtil() {}
 
-    public static void encryptMessage(JavaRSA rsa, JavaAES aes, String message, String encryptedMessage) throws Exception {
+    // This method will take 2 strings. One is an existing file to be encrypted. The other is the name of the encrypted file.
+    // The function will generate an RSA key pair, generate an AES key, encrypt the file, encrypt the AES key with the RSA public key,
+    public static void encryptMessage(String message, String encryptedMessage) throws Exception {
+
+        // Generate an RSA key pair
+        JavaRSA rsa = new JavaRSA();
+        rsa.RSAKeyPairGenerator("PublicKey.pem", "PrivateKey.pem");
+
+        // Generate the AES key for encryption, and pass the files.
+        JavaAES aes = new JavaAES();
+        aes.generateRandomizedAESKey();
+        aes.encryptFile(message, encryptedMessage);
+//        aes.saveKey("AESKey.key");
+
+        // encrypt the AES key with the public RSA key.
+        // this will also save the file to the disk.
+        rsa.encryptAESKey(rsa.getPublicKey(), aes.getKey());
+
+        // send the user the encrypted text message and the encrypted AES key.
+        // the recipient can use their private key to decrypt
+        // (AES key could also be prepended to the encrypted message etc.)
+
+        //    Optional Compression :
         //    Before Encrypting: Compress the data using compressData.
         //    After Encrypting: Proceed with your usual encryption routine.
         //    Before Decrypting: Decrypt the data as you normally would.
         //    After Decrypting: Decompress the decrypted data using decompressData.
     }
 
-    public static void decryptMessage(PrivateKey privateKey, String encryptedAESKey, String encryptedMessage, String decryptedMessage) throws Exception {
+    // This method loads the encrypted aes key, decrypts it with the private key, and then decrypts the message with the aes key.
+    public static void decryptMessage(String encryptedMessage, String decryptedMessage) throws Exception {
+
+        // load the encrypted AES key from disk
+        byte[] encryptedAESKeyData = Files.readAllBytes(Paths.get("EncryptedAESKey.key"));
+
+        // Create new instance of RSA class to load the private key and decrypt the AES key.
+        JavaRSA rsa = new JavaRSA();
+        rsa.setPrivateKey(rsa.loadPrivateKey("PrivateKey.pem"));
+        SecretKey decryptedAESKey = rsa.decryptAESKey(rsa.getPrivateKey(), encryptedAESKeyData);
+
+        // Create AES instance and set the now decrypted AES key. and decrypt the message.
+        JavaAES aes = new JavaAES();
+        aes.setKey(decryptedAESKey);
+        aes.decryptFile(encryptedMessage, decryptedMessage);
+
     }
 
     public static String convertToBase64(String inputString, String outputString) throws IOException {

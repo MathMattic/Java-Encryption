@@ -8,6 +8,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 
+/**
+ * This program demonstrates how to use the Diffie-Hellman key agreement protocol to agree on a shared secret key
+ */
 public class JavaDH {
 
     public static void main(String[] args) throws Exception {

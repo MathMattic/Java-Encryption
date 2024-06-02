@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
+/**
+ * JavaRSA class that generates RSA key pair, saves and loads public and private keys, encrypts and decrypts AES key
+ */
 public class JavaRSA {
 
     private PublicKey publicKey;
@@ -20,6 +23,7 @@ public class JavaRSA {
     private static final String ALGORITHM = "RSA";
     private static final int KEY_LENGTH = 4096;
 
+    // Generate RSA key pair
     public KeyPair RSAKeyPairGenerator(String publicKeyName, String privateKeyName) throws IOException, NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
         keyGen.initialize(KEY_LENGTH);
@@ -84,9 +88,10 @@ public class JavaRSA {
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         byte[] encryptedKey = cipher.doFinal(aesKey.getEncoded());
-        LocalDateTime now = LocalDateTime.now();
-        String formattedTimestamp = now.format(DateTimeFormatter.ofPattern("MM-dd-HHmmss"));
-        Files.write(Paths.get(formattedTimestamp + ".key"), encryptedKey);
+//        LocalDateTime now = LocalDateTime.now();
+//        String formattedTimestamp = now.format(DateTimeFormatter.ofPattern("MM-dd-HHmmss"));
+//        Files.write(Paths.get(formattedTimestamp + ".key"), encryptedKey);
+        Files.write(Paths.get("EncryptedAESKey.key"), encryptedKey);
         return encryptedKey;
     }
 

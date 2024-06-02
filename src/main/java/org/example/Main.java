@@ -1,5 +1,6 @@
 package org.example;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.example.Java.JavaAES;
 import org.example.Java.JavaRSA;
 import org.example.Java.JavaUtil;
@@ -20,18 +21,30 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+//        Security.addProvider(new BouncyCastleProvider());
 
 
-//        JavaRSA rsa = new JavaRSA();
-//        rsa.RSAKeyPairGenerator("publickey.pem", "privatekey.pem");
+
 //        JavaAES aes = new JavaAES();
-//        aes.generatePasswordAESKey("password", "salt");
-//        aes.encryptFile("test.txt", "encrypted.txt");
-//        byte[] encryptedAESKeyData = rsa.encryptAESKey(rsa.getPublicKey(), aes.getKey());
+//        aes.generatePasswordAESKey("myPass");
+//        System.out.println(aes.getSalt());
+//        String encrypted_text = aes.encryptText("Hello World");
+//        System.out.println("encrypted: " + encrypted_text);
+//        String decrypted_text = aes.decryptText(encrypted_text);
+//        System.out.println("decrypted: " + decrypted_text);
 //
-//        SecretKey decryptedAESKey = rsa.decryptAESKey(rsa.getPrivateKey(), encryptedAESKeyData);
-//        aes.setKey(decryptedAESKey);
-//        aes.decryptFile("encrypted.txt", "decrypted.txt");
+//        JavaAES aes2 = new JavaAES();
+//        aes2.reGeneratePasswordAESKey("myPass", aes.getSalt());
+//        String x = aes2.decryptText(encrypted_text);
+//        System.out.println(x);
+
+
+
+
+//        JavaUtil.encryptMessage("test.txt", "encrypted.txt");
+//        JavaUtil.decryptMessage("encrypted.txt", "decryptedback.txt");
+
+
 
 
 //        BCAES aes = new BCAES();
@@ -40,6 +53,7 @@ public class Main {
 //        JavaBCUtil.toAsciiArmored("aeskey.txt", "aeskey.asc");
 //        aes.encryptFile("test.txt", "encrypted.txt");
 //        aes.decryptFile("encrypted.txt", "decrypted.txt");
+
 
 
 //        JavaAES aes = new JavaAES();

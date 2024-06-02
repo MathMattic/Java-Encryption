@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.Secret
 
 public class SpringPbkdf2 {
     public static void main(String[] args) {
+        // password hashing example with Spring and pbkdf2.
 
         CharSequence secret = "secret"; // "pepper" fixed value across all password hashing for more security
         int saltLength = 16;

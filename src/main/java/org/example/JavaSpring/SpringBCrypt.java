@@ -4,6 +4,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class SpringBCrypt {
     public static void main(String[] args) {
+        // password hashing example with Spring and Bcrypt.
         // in Bcrypt, the salt is 128 bits
         // It is then base64 encoded and will be a 22 length string
 
